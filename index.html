@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jogo de Adivinhação</title>
 <meta property="og:title" content="🎯 Jogo de Adivinhação">
-<meta property="og:description" content="Desafie seus amigos em um jogo de adivinhação com 3 fases!">
+<meta property="og:description" content="Desafie seus amigos em um jogo de adivinhação com 7 fases!">
 <meta name="theme-color" content="#4facfe">
 
 <style>
@@ -213,48 +213,59 @@ let numero = gerarNumero();
 let palpitesTotais = 0;
 let tempoInicio = Date.now();
 
+// Configuração de todas as 7 fases
+const fases = [
+    { numero: 1, limite: 10, tentativas: 5, emoji: "🥚" },
+    { numero: 2, limite: 20, tentativas: 4, emoji: "🌱" },
+    { numero: 3, limite: 50, tentativas: 3, emoji: "🌿" },
+    { numero: 4, limite: 100, tentativas: 3, emoji: "🌳" },
+    { numero: 5, limite: 200, tentativas: 2, emoji: "🏔️" },
+    { numero: 6, limite: 500, tentativas: 2, emoji: "🌋" },
+    { numero: 7, limite: 1000, tentativas: 2, emoji: "⭐" }
+];
+
 function gerarNumero() {
     return Math.floor(Math.random() * limite) + 1;
 }
 
 function atualizarTela() {
-    document.getElementById("fase").innerText = "Fase " + fase;
+    const faseAtual = fases[fase - 1];
+    document.getElementById("fase").innerText = `Fase ${fase} ${faseAtual.emoji}`;
     document.getElementById("info").innerText =
         `Adivinhe um número entre 1 e ${limite}\n| Tentativas: ${tentativas}`;
-    const progresso = (fase / 3) * 100;
+    const progresso = (fase / 7) * 100;
     document.getElementById("progressBar").style.width = progresso + "%";
 }
 
 function proximaFase() {
     fase++;
 
-    if (fase === 2) {
-        limite = 20;
-        tentativas = 4;
-    }
-    else if (fase === 3) {
-        limite = 50;
-        tentativas = 3;
-    }
-    else {
+    if (fase <= 7) {
+        const faseAtual = fases[fase - 1];
+        limite = faseAtual.limite;
+        tentativas = faseAtual.tentativas;
+        numero = gerarNumero();
+        atualizarTela();
+        document.getElementById("mensagem").innerHTML = "⭐ Fase concluída! Próxima fase!";
+    } else {
         vitoria();
-        return;
     }
-
-    numero = gerarNumero();
-    atualizarTela();
-    document.getElementById("mensagem").innerHTML = "⭐ Fase concluída! Próxima fase!";
 }
 
 function vitoria() {
     const tempoTotal = Math.floor((Date.now() - tempoInicio) / 1000);
+    const minutos = Math.floor(tempoTotal / 60);
+    const segundos = tempoTotal % 60;
+    const tempoFormatado = minutos > 0 ? `${minutos}m ${segundos}s` : `${segundos}s`;
+    
     document.body.innerHTML = `
         <div class="container">
             <h1>🏆 PARABÉNS! VOCÊ VENCEU!</h1>
-            <h2>Todas as 3 fases concluídas!</h2>
+            <h2>Todas as 7 fases concluídas!</h2>
             <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin: 20px 0;">
-                <p><strong>⏱️ Tempo Total:</strong> ${tempoTotal}s</p>
+                <p><strong>⏱️ Tempo Total:</strong> ${tempoFormatado}</p>
                 <p><strong>🎯 Total de Palpites:</strong> ${palpitesTotais}</p>
+                <p><strong>📈 Dificuldade Final:</strong> 1-1000</p>
             </div>
             <button class="share-btn" onclick="compartilharWhatsapp()">💬 Compartilhar WhatsApp</button>
             <button class="share-btn" onclick="compartilharTwitter()">𝕏 Compartilhar Twitter</button>
@@ -282,11 +293,20 @@ function jogar() {
         tentativas--;
 
         if (tentativas <= 0) {
+            const tempoTotal = Math.floor((Date.now() - tempoInicio) / 1000);
+            const minutos = Math.floor(tempoTotal / 60);
+            const segundos = tempoTotal % 60;
+            const tempoFormatado = minutos > 0 ? `${minutos}m ${segundos}s` : `${segundos}s`;
+            
             document.body.innerHTML = `
                 <div class="container">
                     <h1>❌ Game Over!</h1>
                     <h2>O número era ${numero}</h2>
-                    <p>Você chegou até a Fase ${fase}</p>
+                    <p>Você chegou até a <strong>Fase ${fase}</strong></p>
+                    <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin: 20px 0;">
+                        <p><strong>⏱️ Tempo:</strong> ${tempoFormatado}</p>
+                        <p><strong>🎯 Total de Palpites:</strong> ${palpitesTotais}</p>
+                    </div>
                     <button class="share-btn" style="margin-top: 20px;" onclick="location.reload()">🔄 Tentar Novamente</button>
                 </div>
             `;
@@ -306,12 +326,12 @@ function jogar() {
 }
 
 function compartilharWhatsapp() {
-    const texto = `🎯 Consegui vencer todas as 3 fases do Jogo de Adivinhação! Você consegue? ${window.location.href}`;
+    const texto = `🎯 Consegui vencer todas as 7 fases do Jogo de Adivinhação! 🏆 Você consegue? ${window.location.href}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`);
 }
 
 function compartilharTwitter() {
-    const texto = `Venci todas as 3 fases do 🎯 Jogo de Adivinhação! Desafio aceito? ${window.location.href}`;
+    const texto = `Venci todas as 7 fases do 🎯 Jogo de Adivinhação! Desafio aceito? 🏆 ${window.location.href}`;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}`);
 }
 
