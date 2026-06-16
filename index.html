@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jogo de Adivinhação</title>
+<meta property="og:title" content="🎯 Jogo de Adivinhação">
+<meta property="og:description" content="Desafie seus amigos em um jogo de adivinhação com 3 fases!">
+<meta name="theme-color" content="#4facfe">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    background: rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 400px;
+    padding: 40px 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    animation: aparecer 1s;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes aparecer {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+h1 {
+    margin-bottom: 10px;
+    font-size: 2em;
+}
+
+h2 {
+    color: #ffd700;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+}
+
+#info {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+    font-size: 1em;
+    line-height: 1.6;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    justify-content: center;
+}
+
+input {
+    padding: 12px 15px;
+    font-size: 18px;
+    width: 100px;
+    border: 2px solid white;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+button {
+    padding: 12px 25px;
+    font-size: 18px;
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+#mensagem {
+    margin-top: 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+    min-height: 30px;
+    animation: pulse 0.5s;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.9); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.share-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    padding: 10px 20px;
+    font-size: 16px;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.share-btn:hover {
+    background: linear-gradient(135deg, #764ba2, #667eea);
+}
+
+.copy-link {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+    font-size: 0.9em;
+    word-break: break-all;
+    cursor: pointer;
+}
+
+.copy-link:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    margin: 10px 0;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffd700, #ffed4e);
+    transition: width 0.3s;
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 30px 15px;
+    }
+    h1 {
+        font-size: 1.5em;
+    }
+    input {
+        width: 80px;
+        font-size: 16px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+    <h1>🎯 Jogo de Adivinhação</h1>
+    <h2 id="fase">Fase 1</h2>
+    <p id="info"></p>
+    <div class="input-group">
+        <input type="number" id="palpite" placeholder="Digite" autocomplete="off">
+        <button onclick="jogar()">Tentar</button>
+    </div>
+    <p id="mensagem"></p>
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressBar"></div>
+    </div>
+</div>
+
+<script>
+let fase = 1;
+let limite = 10;
+let tentativas = 5;
+let numero = gerarNumero();
+let palpitesTotais = 0;
+let tempoInicio = Date.now();
+
+function gerarNumero() {
+    return Math.floor(Math.random() * limite) + 1;
+}
+
+function atualizarTela() {
+    document.getElementById("fase").innerText = "Fase " + fase;
+    document.getElementById("info").innerText =
+        `Adivinhe um número entre 1 e ${limite}\n| Tentativas: ${tentativas}`;
+    const progresso = (fase / 3) * 100;
+    document.getElementById("progressBar").style.width = progresso + "%";
+}
+
+function proximaFase() {
+    fase++;
+
+    if (fase === 2) {
+        limite = 20;
+        tentativas = 4;
+    }
+    else if (fase === 3) {
+        limite = 50;
+        tentativas = 3;
+    }
+    else {
+        vitoria();
+        return;
+    }
+
+    numero = gerarNumero();
+    atualizarTela();
+    document.getElementById("mensagem").innerHTML = "⭐ Fase concluída! Próxima fase!";
+}
+
+function vitoria() {
+    const tempoTotal = Math.floor((Date.now() - tempoInicio) / 1000);
+    document.body.innerHTML = `
+        <div class="container">
+            <h1>🏆 PARABÉNS! VOCÊ VENCEU!</h1>
+            <h2>Todas as 3 fases concluídas!</h2>
+            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin: 20px 0;">
+                <p><strong>⏱️ Tempo Total:</strong> ${tempoTotal}s</p>
+                <p><strong>🎯 Total de Palpites:</strong> ${palpitesTotais}</p>
+            </div>
+            <button class="share-btn" onclick="compartilharWhatsapp()">💬 Compartilhar WhatsApp</button>
+            <button class="share-btn" onclick="compartilharTwitter()">𝕏 Compartilhar Twitter</button>
+            <button class="share-btn" onclick="compartilharLink()">🔗 Copiar Link</button>
+            <button class="share-btn" style="margin-top: 15px;" onclick="location.reload()">🔄 Jogar Novamente</button>
+        </div>
+    `;
+}
+
+function jogar() {
+    let palpite = Number(document.getElementById("palpite").value);
+
+    if (!palpite || palpite < 1 || palpite > limite) {
+        document.getElementById("mensagem").innerHTML = `❌ Digite um número entre 1 e ${limite}!`;
+        return;
+    }
+
+    palpitesTotais++;
+
+    if (palpite === numero) {
+        document.getElementById("mensagem").innerHTML = "🎉 Acertou!";
+        setTimeout(proximaFase, 1500);
+    }
+    else {
+        tentativas--;
+
+        if (tentativas <= 0) {
+            document.body.innerHTML = `
+                <div class="container">
+                    <h1>❌ Game Over!</h1>
+                    <h2>O número era ${numero}</h2>
+                    <p>Você chegou até a Fase ${fase}</p>
+                    <button class="share-btn" style="margin-top: 20px;" onclick="location.reload()">🔄 Tentar Novamente</button>
+                </div>
+            `;
+            return;
+        }
+
+        if (palpite < numero) {
+            document.getElementById("mensagem").innerHTML = "⬆️ O número é maior!";
+        } else {
+            document.getElementById("mensagem").innerHTML = "⬇️ O número é menor!";
+        }
+
+        atualizarTela();
+    }
+
+    document.getElementById("palpite").value = "";
+}
+
+function compartilharWhatsapp() {
+    const texto = `🎯 Consegui vencer todas as 3 fases do Jogo de Adivinhação! Você consegue? ${window.location.href}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`);
+}
+
+function compartilharTwitter() {
+    const texto = `Venci todas as 3 fases do 🎯 Jogo de Adivinhação! Desafio aceito? ${window.location.href}`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}`);
+}
+
+function compartilharLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+        alert("✅ Link copiado!");
+    });
+}
+
+document.getElementById("palpite").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") jogar();
+});
+
+atualizarTela();
+</script>
+</body>
+</html>
